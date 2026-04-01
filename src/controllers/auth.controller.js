@@ -7,20 +7,20 @@ export const authController = {
          const result = await authService.login(req);
          const response = responseSuccess(result, `Login auth successfully`);
          
-         res.cookie('accessToken', token, {
-         httpOnly: true, // Chống XSS
-         secure: true,   // BẮT BUỘC: Chỉ gửi cookie qua HTTPS (Render/Vercel đều có HTTPS)
-         sameSite: 'none', // BẮT BUỘC: Cho phép gửi cookie chéo domain (Cross-site)
-         maxAge: 24 * 60 * 60 * 1000 // 1 ngày
-      });
+         res.cookie('accessToken', response.accessToken, {
+            httpOnly: true, // Chống XSS
+            secure: true,   // BẮT BUỘC: Chỉ gửi cookie qua HTTPS (Render/Vercel đều có HTTPS)
+            sameSite: 'none', // BẮT BUỘC: Cho phép gửi cookie chéo domain (Cross-site)
+            maxAge: 24 * 60 * 60 * 1000 // 1 ngày
+         });
 
-      // Làm tương tự với refreshToken
-      res.cookie('refreshToken', refreshToken, {
-         httpOnly: true,
-         secure: true,
-         sameSite: 'none',
-         maxAge: 24 * 60 * 60 * 1000
-      });
+         // Làm tương tự với refreshToken
+         res.cookie('refreshToken', response.refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            maxAge: 24 * 60 * 60 * 1000
+         });
          res.status(response.statusCode).json(response);
       } catch (err) {
          next(err);
@@ -32,8 +32,14 @@ export const authController = {
          const result = await authService.logout(req);
          const response = responseSuccess(result, `Login auth successfully`);
          
-         res.clearCookie("accessToken");
-         res.clearCookie("refreshToken");
+         const cookieOptions = {
+            httpOnly: true,
+            secure: true,   // Bắt buộc nếu lúc login có
+            sameSite: 'none' // Bắt buộc nếu lúc login có
+         };
+
+         res.clearCookie("accessToken", cookieOptions);
+         res.clearCookie("refreshToken", cookieOptions);
          res.status(response.statusCode).json(response);
       } catch (err) {
          next(err);

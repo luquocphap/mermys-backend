@@ -13,7 +13,9 @@ export const orderService = {
         const newOrder = await prisma.order.create({
             data: data
         });
-        return true;
+        return {
+            id: newOrder.id
+        };
     },
 
     async findAll(req) {
@@ -22,6 +24,24 @@ export const orderService = {
         // const resultSequelize = await product.findAll();
         const resultPrismaPromise = prisma.order.findMany({
             where: where,
+            include: {
+                product_quantities: {
+                    select: {
+                        price: true,
+                        products: {
+                            select: {
+                                name: true,
+                                image_link: true
+                            }
+                        },
+                        quantities: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    },
+                }
+            },
             skip: index,
             take: pageSize
         });

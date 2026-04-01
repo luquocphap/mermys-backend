@@ -1,5 +1,6 @@
 import { emailService } from "../services/email.service.js";
 import { responseSuccess } from "../common/helpers/response.helper.js";
+import { BadRequestException } from "../common/helpers/exception.helper.js";
 export const emailController = {
    async create(req, res, next) {
       try {
@@ -7,6 +8,9 @@ export const emailController = {
          const response = responseSuccess(result, `Create email successfully`);
          res.status(response.statusCode).json(response);
       } catch (err) {
+         if (err.code = 'P2002'){
+            next(new BadRequestException("Email này đã được sử dụng! chúng tôi sẽ liên hệ với bạn sau"))
+         }
          next(err);
       }
    },
@@ -36,6 +40,7 @@ export const emailController = {
          const response = responseSuccess(result, `Remove email #${req.params.id} successfully`);
          res.status(response.statusCode).json(response);
       } catch (err) {
+         
          next(err);
       }
    }

@@ -22,10 +22,12 @@ export const productService = {
                     select: {
                         quantities: {
                             select: {
+                                id: true,
                                 name: true
                             }
                         },
-                        price: true
+                        price: true,
+                        id: true
                     }
                 }
             },
@@ -117,7 +119,9 @@ export const productService = {
 
             return { newProduct, productQuantities };
         });
-        return true;
+        return {
+            id: result.newProduct.id
+        };
     },
 
     /**

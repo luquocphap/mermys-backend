@@ -119,7 +119,7 @@
 ## 2. PRODUCT - Quản lý sản phẩm
 
 ### 2.1 GET `/product`
-**Mô tả:** Lấy danh sách sản phẩm (có phân trang)
+**Mô tả:** Lấy danh sách sản phẩm (có phân trang, bao gồm product_quantities của từng sản phẩm)
 - **Method:** GET
 - **Auth:** ❌ Không cần
 - **Query Parameters:**
@@ -141,23 +141,43 @@
         {
           "id": 1,
           "category_id": 1,
-          "name": "Sản phẩm 1",
-          "short_description": "Mô tả ngắn",
-          "detailed_description": "Mô tả chi tiết",
-          "image_link": "image_url",
+          "name": "Tinh dầu Lavender",
+          "short_description": "Tinh dầu thiên nhiên",
+          "detailed_description": "Tinh dầu Lavender 100% tự nhiên",
+          "image_link": "cloudinary_public_id",
           "isDeleted": false,
-          "createdAt": "2024-01-01T00:00:00.000Z"
+          "createdAt": "2024-01-01T00:00:00.000Z",
+          "categories": {
+            "name": "Tinh dầu"
+          },
+          "product_quantities": [
+            {
+              "price": "50000",
+              "quantities": {
+                "name": "Chai 10ml"
+              }
+            },
+            {
+              "price": "100000",
+              "quantities": {
+                "name": "Chai 30ml"
+              }
+            }
+          ]
         }
       ]
     },
     "message": "Lấy danh sách product thành công"
   }
   ```
+- **Ghi chú:**
+  - Trường `product_quantities` chứa các loại sản phẩm với giá tương ứng
+  - Sử dụng để hiển thị sản phẩm ở trang danh sách
 
 ---
 
 ### 2.2 GET `/product/:productId`
-**Mô tả:** Lấy chi tiết sản phẩm
+**Mô tả:** Lấy chi tiết sản phẩm (bao gồm tất cả product_quantities)
 - **Method:** GET
 - **Auth:** ❌ Không cần
 - **Input (Params):**
@@ -168,20 +188,60 @@
 - **Output (Success):**
   ```json
   {
-    "statusCode": 201,
+    "statusCode": 200,
     "data": {
       "id": 1,
       "category_id": 1,
-      "name": "Sản phẩm 1",
-      "short_description": "Mô tả ngắn",
-      "detailed_description": "Mô tả chi tiết",
-      "image_link": "image_url",
+      "name": "Tinh dầu Lavender",
+      "short_description": "Tinh dầu thiên nhiên",
+      "detailed_description": "Tinh dầu Lavender 100% tự nhiên, an toàn cho sức khỏe",
+      "image_link": "cloudinary_public_id",
       "isDeleted": false,
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-15T10:30:00.000Z",
+      "categories": {
+        "name": "Tinh dầu"
+      },
+      "product_quantities": [
+        {
+          "id": 10,
+          "product_id": 1,
+          "price": "50000.00",
+          "quantities": {
+            "id": 1,
+            "name": "Chai 10ml"
+          }
+        },
+        {
+          "id": 11,
+          "product_id": 1,
+          "price": "100000.00",
+          "quantities": {
+            "id": 2,
+            "name": "Chai 30ml"
+          }
+        },
+        {
+          "id": 12,
+          "product_id": 1,
+          "price": "200000.00",
+          "quantities": {
+            "id": 3,
+            "name": "Hộp 50ml"
+          }
+        }
+      ]
     },
     "message": "Lấy danh sách product thành công"
   }
   ```
+- **Ghi chú:**
+  - Trường `product_quantities` chứa tất cả các loại sản phẩm với giá tương ứng
+  - Mỗi item trong `product_quantities` có:
+    - `id` - Product quantity ID (dùng khi thêm vào giỏ hàng)
+    - `product_id` - ID sản phẩm
+    - `price` - Giá của loại sản phẩm này
+    - `quantities` - Thông tin về unit (name, id)
 
 ---
 

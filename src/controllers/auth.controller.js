@@ -15,6 +15,19 @@ export const authController = {
       }
    },
 
+   async logout(req, res, next) {
+      try {
+         const result = await authService.logout(req);
+         const response = responseSuccess(result, `Login auth successfully`);
+         
+         res.clearCookie("accessToken");
+         res.clearCookie("refreshToken");
+         res.status(response.statusCode).json(response);
+      } catch (err) {
+         next(err);
+      }
+   },
+
    async register(req, res, next) {
       try {
          const result = await authService.register(req);

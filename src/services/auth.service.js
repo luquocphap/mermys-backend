@@ -64,6 +64,28 @@ export const authService = {
     return req.user;
    }, 
 
+   async logout(req){
+    const user = req.user;
+    
+    if (!user) {
+        throw new UnauthorizedException("User not authenticated");
+    }
+
+    // Xác minh người dùng tồn tại trong database
+    const userExists = await prisma.admins.findUnique({
+        where: {
+            id: user.id
+        }
+    });
+
+    if (!userExists) {
+        throw new BadRequestException("User does not exist");
+    }
+
+    console.log({ userId: user.id });
+    return true;
+   },
+
    async refreshToken(req){
     const { accessToken, refreshToken } = req.cookies;
     if (!accessToken) {

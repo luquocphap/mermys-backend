@@ -8,6 +8,7 @@ import { initLoginGooglePassport } from "./src/common/passport/login-google.pass
 import swaggerUi from 'swagger-ui-express';
 import { swaggerDocument } from "./src/common/swagger/init.swagger.js";
 import { initSocket } from "./src/common/socket/init.socket.js";
+import { FRONTEND_URL } from "./src/common/constant/app.constant.js";
 
 
 const app = express();
@@ -22,7 +23,9 @@ const app = express();
 //     next();
 // })
 
-app.use(cors({ origin: ["http://localhost:8080", "google.com"], credentials: true }))
+app.set('trust proxy', 1);
+
+app.use(cors({ origin: ["http://localhost:8080", FRONTEND_URL, "google.com"], credentials: true }))
 app.get("", (req, res, next) => {
     res.json("Hello world")
 });

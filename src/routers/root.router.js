@@ -5,6 +5,7 @@ import categoryRouter from "./category.router.js";
 import emailRouter from "./email.router.js";
 import orderRouter from "./order.router.js";
 import quantityRouter from "./quantity.router.js";
+import aiRouter from "./ai.router.js";
 
 const rootRouter = express.Router();
 
@@ -13,7 +14,8 @@ rootRouter.use("/auth", authRouter);
 rootRouter.use("/category", categoryRouter);
 rootRouter.use('/email', emailRouter);
 rootRouter.use("/order", orderRouter);
-rootRouter.use("/quantity", quantityRouter)
+rootRouter.use("/quantity", quantityRouter);
+rootRouter.use("/ai-recommend", aiRouter);
 
 
 

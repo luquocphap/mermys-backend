@@ -194,13 +194,13 @@ export const productService = {
             }
         })
 
+        if (!product) {
+            throw new BadRequestException("Sản phẩm không tồn tại");
+        }
+
+        // Delete old image from Cloudinary if exists
         if (product.image_link){
-            // xóa local
-            const oldFilePath = path.join("public/images/", req.user.avatar);
-            if (fs.existsSync(oldFilePath)) {
-                fs.unlinkSync(oldFilePath)
-            }
-            cloudinary.uploader.destroy(req.user.avatar)
+            cloudinary.uploader.destroy(product.image_link)
         }
 
 

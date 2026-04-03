@@ -121,6 +121,7 @@ model products {
   deletedAt            DateTime?            @db.Timestamp(6)
   createdAt            DateTime             @default(now()) @db.Timestamp(6)
   updatedAt            DateTime             @default(now()) @db.Timestamp(6)
+  isfeatured           Int?                 @db.SmallInt
   product_quantities   product_quantities[]
   categories           categories           @relation(fields: [category_id], references: [id], map: "products_ibfk_1")
 

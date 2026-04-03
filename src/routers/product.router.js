@@ -20,8 +20,8 @@ productRouter.post("/:productId/image", protect, uploadMemoryStorage.single('ima
 productRouter.post("/:productId/quantities", protect, productController.addQuantityToProduct);
 
 // UPDATE
-productRouter.put("/:productId", productController.update);
+productRouter.put("/:productId", protect, productController.update);
 
 // DELETE
-productRouter.delete("/:productId", productController.delete)
+productRouter.delete("/:productId", protect, productController.delete)
 export default productRouter;

@@ -34,7 +34,6 @@ export const aiService = {
             Nhiệm vụ của bạn: Dựa vào yêu cầu trên, hãy phân tích và chọn ra đúng 10 sản phẩm phù hợp nhất.
             BẮT BUỘC CHỈ TRẢ VỀ ĐÚNG 1 MẢNG JSON CHỨA ID CỦA CÁC SẢN PHẨM. KHÔNG VIẾT THÊM BẤT KỲ CÂU CHỮ NÀO KHÁC.
             Ví dụ định dạng trả về hợp lệ: [1, 5, 12, 10, ...]
-            Ngoài ra, sản phẩm bạn trả về phải được sort theo category. Thứ tự các sản phẩm được xếp theo thứ tự category_id là 6, 1, 2, 4, 5
         `;
 
         let recommendedIds = [];
@@ -57,21 +56,46 @@ export const aiService = {
             console.log("AI gợi ý thành công:", recommendedIds);
 
         } catch (error) {
-            console.error("Lỗi AI (Rate Limit / JSON Parse), kích hoạt danh sách Mặc định:", error.message);
+            console.error("Lỗi AI, kích hoạt danh sách NGẪU NHIÊN & ĐẦY ĐỦ DANH MỤC:", error.message);
             
-            // LOGIC FALLBACK: Chọn 10 sản phẩm mặc định
-            // Sắp xếp tay theo đúng thứ tự category_id 6, 1, 2, 4, 5 như prompt yêu cầu
-            const defaultOrder = { 6: 1, 1: 2, 2: 3, 4: 4, 5: 5 };
+            // LOGIC FALLBACK: Ngẫu nhiên nhưng đầy đủ các loại
             
-            const defaultProducts = products
-                .sort((a, b) => {
-                    const orderA = defaultOrder[a.category_id] || 99;
-                    const orderB = defaultOrder[b.category_id] || 99;
-                    return orderA - orderB;
-                })
-                .slice(0, 10); // Lấy 10 sản phẩm đầu tiên sau khi sort
+            // 1. Phân loại sản phẩm vào từng "rổ" (category)
+            const productsByCategory = {};
+            products.forEach(p => {
+                if (!productsByCategory[p.category_id]) {
+                    productsByCategory[p.category_id] = [];
+                }
+                productsByCategory[p.category_id].push(p);
+            });
+
+            const random10Products = [];
+            const remainingProducts = [];
+
+            // 2. Đi dạo qua từng "rổ", bốc ngẫu nhiên 1 món bỏ vào danh sách chọn
+            for (const catId in productsByCategory) {
+                // Xáo trộn ngẫu nhiên rổ sản phẩm hiện tại
+                const shuffledCat = [...productsByCategory[catId]].sort(() => 0.5 - Math.random());
+                
+                // Bốc món đầu tiên (đảm bảo category này có mặt)
+                if (shuffledCat.length > 0) {
+                    random10Products.push(shuffledCat[0]);
+                    // Quăng các món còn dư vào một kho chung
+                    remainingProducts.push(...shuffledCat.slice(1));
+                }
+            }
+
+            // 3. Nếu bốc mỗi loại 1 món mà vẫn chưa đủ 10, thì bốc đại thêm từ kho chung
+            if (random10Products.length < 10) {
+                const needed = 10 - random10Products.length;
+                const shuffledRemaining = remainingProducts.sort(() => 0.5 - Math.random());
+                random10Products.push(...shuffledRemaining.slice(0, needed));
+            }
+
+            const final10Products = random10Products.slice(0, 10);
             
-            recommendedIds = defaultProducts.map(p => p.id);
+            recommendedIds = final10Products.map(p => p.id);
+            
         }
 
         if (recommendedIds.length === 0) return [];
@@ -91,9 +115,24 @@ export const aiService = {
         });
 
         // 5. BƯỚC QUAN TRỌNG: Sắp xếp lại kết quả Prisma theo đúng thứ tự của mảng recommendedIds
-        const sortedFinalProducts = recommendedIds
-            .map(id => recommendedProducts.find(p => p.id === id))
-            .filter(Boolean); // Bỏ qua nếu lỡ ID không tìm thấy
+        const CATEGORY_ORDER = [6, 1, 2, 3, 4, 5];
+
+        // Tạo map để tra cứu thứ tự nhanh O(1)
+        const categoryOrderMap = CATEGORY_ORDER.reduce((acc, catId, index) => {
+            acc[catId] = index;
+            return acc;
+        }, {});
+
+        const sortedFinalProducts = recommendedProducts.sort((a, b) => {
+            const orderA = categoryOrderMap[a.category_id] ?? 999;
+            const orderB = categoryOrderMap[b.category_id] ?? 999;
+
+            if (orderA !== orderB) return orderA - orderB;
+
+            return 0;
+        });
+
+        console.log({sortedFinalProducts})
 
         return sortedFinalProducts;
     }

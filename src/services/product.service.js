@@ -40,12 +40,29 @@ export const productService = {
         });
         const [resultPrisma, totalItems] = await Promise.all([resultPrismaPromise, totalItemsPromise]);
         const totalPage = Math.ceil(totalItems / pageSize);
+
+        const CATEGORY_ORDER = [6, 1, 2, 3, 4, 5];
+
+        // Tạo map để tra cứu thứ tự nhanh O(1)
+        const categoryOrderMap = CATEGORY_ORDER.reduce((acc, catId, index) => {
+            acc[catId] = index;
+            return acc;
+        }, {});
+
+        const sortedFinalProducts = resultPrisma.sort((a, b) => {
+            const orderA = categoryOrderMap[a.category_id] ?? 999;
+            const orderB = categoryOrderMap[b.category_id] ?? 999;
+
+            if (orderA !== orderB) return orderA - orderB;
+
+            return 0;
+        });
         
         return {
             totalItem: totalItems,
             totalPage: totalPage,
             page: page,
-            items: resultPrisma
+            items: sortedFinalProducts
         };
     },
 

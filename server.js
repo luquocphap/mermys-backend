@@ -25,7 +25,7 @@ const app = express();
 
 app.set('trust proxy', 1);
 
-app.use(cors({ origin: ["http://localhost:8080", FRONTEND_URL, "google.com"], credentials: true }))
+app.use(cors({ origin: ["http://localhost:8080", FRONTEND_URL], credentials: true }))
 app.get("", (req, res, next) => {
     res.json("Hello world")
 });

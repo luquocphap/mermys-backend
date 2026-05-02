@@ -1,0 +1,17 @@
+services:
+  postgres:
+    container_name: con-postgres-memys
+    image: postgres:latest
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_ROOT_PASSWORD}
+
+  memys:
+    container_name: con-memys
+    image: luquocphap/img-memys:latest
+    ports:
+      - 3070:3069
+    env_file:
+      - .env
+  

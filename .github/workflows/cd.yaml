@@ -1,0 +1,26 @@
+name: cd
+
+on:
+    workflow_run: 
+        workflows: ["ci"]
+        types: 
+            - completed
+
+
+jobs:
+    start:
+        runs-on: memys
+
+        steps:
+            - name: Stop Container
+              run: sudo docker container stop con-memys
+            
+            - name: Remove Container
+              run: sudo docker container remove con-memys
+            
+            - name: Delete Image
+              run: sudo docker image remove luquocphap/img-memys:latest
+            
+            - name: Pull Image
+              working-directory: /home/luquocphap/memys
+              run: sudo docker compose up -d

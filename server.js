@@ -9,6 +9,7 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerDocument } from "./src/common/swagger/init.swagger.js";
 import { initSocket } from "./src/common/socket/init.socket.js";
 import { FRONTEND_URL } from "./src/common/constant/app.constant.js";
+import { initEmail } from "./src/common/email/init.nodemailer.js";
 
 
 const app = express();
@@ -47,6 +48,8 @@ app.use("/api", rootRouter)
 app.use(appError)
 
 const httpServer = initSocket(app);
+
+await initEmail();
 
 const PORT = 3069
 const server = httpServer.listen(PORT, () => {

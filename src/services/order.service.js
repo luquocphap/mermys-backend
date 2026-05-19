@@ -1,38 +1,73 @@
+import { getOrderConfirmationTemplate } from "../common/constant/email.constant.js";
+import { transporter } from "../common/email/init.nodemailer.js";
 import { buildQueryPrisma } from "../common/helpers/build-query-prisma.helper.js";
 import { BadRequestException } from "../common/helpers/exception.helper.js";
+import { formatCurrency } from "../common/helpers/format.helper.js";
 import { validator } from "../common/helpers/validator.helper.js";
 import { prisma } from "../common/prisma/connect.prisma.js";
 
 export const orderService = {
     async create(req) {
-        const data = req.body;
+        const { email, phone, address, firstName, lastName, city, ward, note, items, total } = req.body;
         
-        // 1. Validate cơ bản
-        if (!validator.isEmail(data.email)) throw new BadRequestException("Email không hợp lệ");
-        if (!validator.isVNPhone10(data.phone)) throw new BadRequestException("Số điện thoại không hợp lệ");
-        if (!validator.isAddress(data.address)) throw new BadRequestException("Địa chỉ không hợp lệ");
-        if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
+        if (!validator.isEmail(email)) throw new BadRequestException("Email không hợp lệ");
+        if (!validator.isVNPhone10(phone)) throw new BadRequestException("Số điện thoại không hợp lệ");
+        if (!validator.isAddress(address)) throw new BadRequestException("Địa chỉ không hợp lệ");
+        if (!items || !Array.isArray(items) || items.length === 0) {
             throw new BadRequestException("Đơn hàng phải có ít nhất 1 sản phẩm");
         }
 
-        // 2. Tạo Order và các Paid Products cùng một lúc bằng Nested Writes
         const newOrder = await prisma.order.create({
             data: {
-                firstName: data.firstName,
-                lastName: data.lastName,
-                email: data.email,
-                phone: data.phone,
-                city: data.city,
-                ward: data.ward,
-                address: data.address,
-                note: data.note,
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                phone: phone,
+                city: city,
+                ward: ward,
+                address: address,
+                note: note,
                 paid_products: {
-                    create: data.items.map(item => ({
+                    create: items.map(item => ({
                         product_quantity_id: item.product_quantity_id,
                         amount: item.amount
                     }))
                 }
+            },
+        });
+
+        const orderedProducts = await prisma.paid_products.findMany({
+            where: {
+                order_id: newOrder.id
+            },
+            include: {
+                product_quantities: {
+                    include: {
+                        quantities: {
+                            select: {
+                                name: true,
+                            }
+                        },
+                        products: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
             }
+        })
+
+        const fullName = `${lastName} ${firstName}`;
+        const productName = orderedProducts
+        .map(cur => `${cur.product_quantities.products.name} (${cur.product_quantities.quantities.name}) x${cur.amount}`)
+        .join(', ');        
+
+        await transporter.sendMail({
+            from: '"Memys" <memysvietnam@gmail.com>',
+            to: email,
+            subject: 'XÁC NHẬN ĐƠN HÀNG THÀNH CÔNG TỪ MEMYS',
+            html: getOrderConfirmationTemplate({ fullName, email, phone, productName, total: formatCurrency(total) }),
         });
         
         return {

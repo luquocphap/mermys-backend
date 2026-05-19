@@ -5,6 +5,8 @@ export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 export const FRONTEND_URL = process.env.FRONTEND_URL;
 export const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+export const SMTP_USER = process.env.SMTP_USER;
+export const SMTP_PASS = process.env.SMTP_PASS;
 console.log(
     "\n",
     {
@@ -13,6 +15,8 @@ console.log(
         REFRESH_TOKEN_SECRET: REFRESH_TOKEN_SECRET,
         FRONTEND_URL: FRONTEND_URL,
         GEMINI_API_KEY: GEMINI_API_KEY,
+        SMTP_USER: SMTP_USER,
+        SMTP_PASS: SMTP_PASS
     },
     "\n"
 )

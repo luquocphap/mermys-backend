@@ -2,6 +2,10 @@ import { prisma } from "../common/prisma/connect.prisma.js";
 import { buildQueryPrisma } from "../common/helpers/build-query-prisma.helper.js";
 import { validator } from "../common/helpers/validator.helper.js";
 import { BadRequestException } from "../common/helpers/exception.helper.js";
+import { SMTP_USER } from "../common/constant/app.constant.js";
+import { transporter } from "../common/email/init.nodemailer.js";
+import nodemailer from "nodemailer";
+import { getConfirmationTemplate } from "../common/constant/email.constant.js";
 export const emailService = {
     async create(req) {
         const data = req.body;
@@ -10,6 +14,8 @@ export const emailService = {
         const newMessage = await prisma.messages.create({
             data: data
         })
+
+        await this.contactEmail(data);
         return {
             newMessage: newMessage
         };
@@ -65,5 +71,17 @@ export const emailService = {
             }
         })
         return newEmail;
+    },
+
+    async contactEmail(contactData){
+        const html = getConfirmationTemplate(contactData);
+
+        await transporter.sendMail({
+            from: '"Memys" <memysvietnam@gmail.com>',
+            to: contactData.email,
+            subject: 'MEMYS – CẢM ƠN BẠN ĐÃ GHÉ THĂM 🌿',
+            html: html,
+        });
+
     }
 };

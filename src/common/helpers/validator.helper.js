@@ -34,8 +34,7 @@ export const validator = {
     isAddress(address) {
         if (!address) return false;
         address = String(address).trim();
-        // Tối thiểu 3 ký tự, chữ, số, dấu, space
-        const regex = /^[\wÀ-ỹ0-9\s,.-]{3,}$/u;
+        const regex = /^[\wÀ-ỹ0-9\s,.\-\/()]{5,}$/u;
         return regex.test(address);
     }
 };
